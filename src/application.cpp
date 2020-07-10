@@ -80,6 +80,7 @@ void VoxelTracer::RenderUI()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // Render GUI & Controls
     ImGui::Begin("Debug");
     ImGui::Text("VoxelTracer");
     ImGui::End();
@@ -101,6 +102,9 @@ void VoxelTracer::run()
 
         glfwGetFramebufferSize(m_context.window, &m_context.width, &m_context.height);
         glViewport(0, 0, m_context.width, m_context.height);
+
+        glClearColor(0.1, 0.2, 0.3, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         Update();
 

@@ -16,19 +16,20 @@ project(VoxelRaytracer
 
 set(APPLICATION_SOURCE
     # Main Application
-    src/main.cpp
-    src/voxel_tracer.cpp
+    "src/main.cpp"
+    "src/application.cpp"
+    "src/raytracing.cpp"
 
     # GLAD
-    external/glad/src/glad.c
+    "external/glad/src/glad.c"
 
     # imGui
-    external/imgui/imgui.cpp
-    external/imgui/imgui_draw.cpp
-    external/imgui/imgui_widgets.cpp
-    external/imgui/examples/imgui_impl_glfw.cpp
-    external/imgui/examples/imgui_impl_opengl3.cpp
-)
+    "external/imgui/imgui.cpp"
+    "external/imgui/imgui_draw.cpp"
+    "external/imgui/imgui_widgets.cpp"
+    "external/imgui/examples/imgui_impl_glfw.cpp"
+    "external/imgui/examples/imgui_impl_opengl3.cpp"
+ )
 
 #-------------------------------------------------------------------------------
 # Binaries
@@ -55,7 +56,7 @@ target_link_libraries(tracer PUBLIC OpenGL::GL glfw ${CMAKE_DL_LIBS})
 target_include_directories(tracer PUBLIC include)
 target_include_directories(tracer PUBLIC external/glfw/include)
 target_include_directories(tracer PUBLIC external/glad/include)
-target_include_directories(tracer PUBLIC external/glm/include)
+target_include_directories(tracer PUBLIC external/glm)
 target_include_directories(tracer PUBLIC external/imgui)
 
 #-------------------------------------------------------------------------------
