@@ -102,10 +102,10 @@ VoxelTracer::VoxelTracer()
     pipeline.compile();
 
     vertexBuffer = new Buffer();
-    vertexBuffer->UploadData<vec3>(vertices, sizeof(vertices));
+    vertexBuffer->UploadData(vertices, sizeof(vertices));
 
     indexArray = new Buffer();
-    indexArray->UploadData<uint16_t>(indices, sizeof(indices));
+    indexArray->UploadData(indices, sizeof(indices));
 
     vertexArray.AddBuffer(vertexBuffer);
     vertexArray.SetIndexBuffer(indexArray);
