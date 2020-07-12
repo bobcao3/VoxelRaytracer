@@ -3,13 +3,12 @@
 // -------------------------------------------------------------------------------
 //  Cheng (Bob) Cao 2020
 
+#include <glm/glm.hpp>
+
+#define ERROR_MSGS_IMPL
 #include "application.h"
 
-std::string ErrorCodeDesc[] = {
-    "None",
-    "GLFW failed to initiate",
-    "GLAD failed to initiate"
-};
+using namespace glm;
 
 void error_callback(int error, const char* description)
 {
@@ -22,7 +21,46 @@ std::ostream& operator<<(std::ostream& os, const ErrorCode& e)
     return os;
 }
 
+std::string vertexShader = R"V0G0N(
+
+#version 450 core
+
+layout (location = 0) in vec3 position;
+
+void main()
+{
+    gl_Position = vec4(position, 1.0);
+}
+
+)V0G0N";
+
+std::string fragmentShader = R"V0G0N(
+
+#version 450 core
+
+out vec4 fragColor;
+
+void main()
+{
+    fragColor = vec4(1.0, 0.4, 0.1, 1.0);
+}
+
+)V0G0N";
+
+vec3 vertices[] = {
+    vec3(-0.5, -0.5, 0.0),
+    vec3( 0.5, -0.5, 0.0),
+    vec3( 0.5,  0.5, 0.0),
+    vec3(-0.5,  0.5, 0.0)
+};
+
+uint16_t indices[] = {
+    0, 1, 2,
+    3, 0, 2
+};
+
 VoxelTracer::VoxelTracer()
+    : pipeline(PipelineType::Raster)
 {
     // Initialize GLFW & OpenGL Context
     {
@@ -57,10 +95,30 @@ VoxelTracer::VoxelTracer()
 
         ImGui::StyleColorsLight();
     }
+
+    // Test content
+    pipeline.LoadFragmentShader(fragmentShader);
+    pipeline.LoadVertexShader(vertexShader);
+    pipeline.compile();
+
+    vertexBuffer = new Buffer();
+    vertexBuffer->UploadData<vec3>(vertices, sizeof(vertices));
+
+    indexArray = new Buffer();
+    indexArray->UploadData<uint16_t>(indices, sizeof(indices));
+
+    vertexArray.AddBuffer(vertexBuffer);
+    vertexArray.SetIndexBuffer(indexArray);
+    vertexArray.AddAttribute(DataType::Float, 3, sizeof(vec3), 0, 0);
+    vertexArray.BuildArray();
 }
 
 VoxelTracer::~VoxelTracer()
 {
+    // Test content
+    delete vertexBuffer;
+    // End test content
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -71,7 +129,12 @@ VoxelTracer::~VoxelTracer()
 
 void VoxelTracer::RenderScene()
 {
-
+    // Test content
+    pipeline.ScopedExec([&](Pipeline& p)
+        {
+            vertexArray.UseVertexArray();
+            p.DrawIndexed(PrimitiveType::Triangles, DataType::Uint16, 6, 0, 0, 1, 0);
+        });
 }
 
 void VoxelTracer::RenderUI()

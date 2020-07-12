@@ -17,12 +17,8 @@
 #include <iostream>
 #include <string>
 
-enum class ErrorCode
-{
-    NO_ERROR,
-    GLFW_INIT_FAILED,
-    GLAD_INIT_FAILED
-};
+#include "errors.h"
+#include "gfx/pipeline.h"
 
 std::ostream& operator<<(std::ostream& os, const ErrorCode& e);
 
@@ -40,6 +36,12 @@ private:
     void RenderScene();
     void RenderUI();
     void Update();
+
+    // Test content
+    Pipeline pipeline;
+    Buffer* vertexBuffer = nullptr;
+    Buffer* indexArray = nullptr;
+    VertexArray vertexArray;
 
 public:
     VoxelTracer();

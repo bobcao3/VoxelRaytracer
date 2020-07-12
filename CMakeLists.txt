@@ -19,6 +19,7 @@ set(APPLICATION_SOURCE
     "src/main.cpp"
     "src/application.cpp"
     "src/raytracing.cpp"
+    "src/gfx/pipeline.cpp"
 
     # GLAD
     "external/glad/src/glad.c"

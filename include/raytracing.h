@@ -27,48 +27,48 @@ const Float EPS = 0.00001f;
 class Ray
 {
 public:
-	Vec3 Direction;
-	Float MinT;
-	Vec3 InvDirection; // rcp of Direction
-	Float MaxT;
+    Vec3 Direction;
+    Float MinT;
+    Vec3 InvDirection; // rcp of Direction
+    Float MaxT;
 
-	Ray(Vec3 Direction, Float MinT = EPS, Float MaxT = MaxFloat);
+    Ray(Vec3 Direction, Float MinT = EPS, Float MaxT = MaxFloat);
 };
 
 class Scene
 {
 public:
-	class Context;
+    class Context;
 
-	virtual Context* LaunchRay() = 0;
-	virtual bool NextIntersection(Context* ctx, Ray& r) = 0;
+    virtual Context* LaunchRay() = 0;
+    virtual bool NextIntersection(Context* ctx, Ray& r) = 0;
 };
 
 class RayTracing
 {
 public:
-	enum class AnyHitBehavior
-	{
-		COMMIT_AND_CONTINUE,
-		IGNORE_AND_CONTINUE,
-		COMMIT_AND_RETURN,
-		CALL_HANDLER
-	};
+    enum class AnyHitBehavior
+    {
+        COMMIT_AND_CONTINUE,
+        IGNORE_AND_CONTINUE,
+        COMMIT_AND_RETURN,
+        CALL_HANDLER
+    };
 
-	enum class ClosestHitBehavior
-	{
-		RETURN,
-		CALL_HANDLER
-	};
+    enum class ClosestHitBehavior
+    {
+        RETURN,
+        CALL_HANDLER
+    };
 
-	std::function<ClosestHitBehavior(const RayTracing&, const Ray&, void*)> cloestHitHandler = nullptr;
-	std::function<AnyHitBehavior(const RayTracing&, const Ray&, void*)> anyHitHandler = nullptr;
+    std::function<ClosestHitBehavior(const RayTracing&, const Ray&, void*)> cloestHitHandler = nullptr;
+    std::function<AnyHitBehavior(const RayTracing&, const Ray&, void*)> anyHitHandler = nullptr;
 
-	void TraceRay(
-		Scene* sc,
-		Ray& r,
-		AnyHitBehavior anyHitFlag = AnyHitBehavior::COMMIT_AND_CONTINUE,
-		ClosestHitBehavior closestHitFlag = ClosestHitBehavior::RETURN,
-		void* payload = nullptr
-		);
+    void TraceRay(
+        Scene* sc,
+        Ray& r,
+        AnyHitBehavior anyHitFlag = AnyHitBehavior::COMMIT_AND_CONTINUE,
+        ClosestHitBehavior closestHitFlag = ClosestHitBehavior::RETURN,
+        void* payload = nullptr
+        );
 };
