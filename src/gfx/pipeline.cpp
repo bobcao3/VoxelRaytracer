@@ -265,13 +265,3 @@ void Pipeline::Dispatch(uint32_t x, uint32_t y, uint32_t z)
 {
     glDispatchCompute(x, y, z);
 }
-
-Buffer::Buffer()
-{
-    glGenBuffers(1, &buffer);
-}
-
-Buffer::~Buffer()
-{
-    glDeleteBuffers(1, &buffer);
-}

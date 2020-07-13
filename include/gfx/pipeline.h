@@ -5,42 +5,12 @@
 
 #pragma once
 
-#include <glad/glad.h>
-
 #include <filesystem>
 #include <functional>
 #include <string>
 
-enum class PrimitiveType
-{
-    Triangles = GL_TRIANGLES,
-    Lines = GL_LINES,
-    Points = GL_POINTS
-};
-
-enum class DataType
-{
-    Uint32 = GL_UNSIGNED_INT,
-    Int32 = GL_INT,
-    Uint16 = GL_UNSIGNED_SHORT,
-    Int16 = GL_SHORT,
-    Uint8 = GL_UNSIGNED_BYTE,
-    Int8 = GL_BYTE,
-    Float = GL_FLOAT,
-    Float16 = GL_HALF_FLOAT,
-    Fixed16 = GL_FIXED
-};
-
-class Buffer
-{
-public:
-    uint32_t buffer = 0;
-
-    Buffer();
-    ~Buffer();
-
-    template <typename T> void UploadData(T* data, size_t numElements);
-};
+#include "gfx.h"
+#include "buffer.h"
 
 class VertexArray
 {
@@ -68,12 +38,6 @@ public:
     void SetIndexBuffer(Buffer* buf);
     void BuildArray();
     void UseVertexArray();
-};
-
-enum class PipelineType
-{
-    Raster,
-    Compute
 };
 
 class Pipeline
@@ -116,10 +80,3 @@ public:
     // Compute Pipeline
     void Dispatch(uint32_t x, uint32_t y, uint32_t z);
 };
-
-template<typename T>
-inline void Buffer::UploadData(T* data, size_t numElements)
-{
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(T) * numElements, reinterpret_cast<uint8_t*>(data), GL_STATIC_DRAW);
-}
