@@ -27,8 +27,11 @@ std::string vertexShader = R"V0G0N(
 
 layout (location = 0) in vec3 position;
 
+out vec2 texcoord;
+
 void main()
 {
+    texcoord = position.st;
     gl_Position = vec4(position, 1.0);
 }
 
@@ -38,11 +41,15 @@ std::string fragmentShader = R"V0G0N(
 
 #version 450 core
 
+layout(binding = 0) uniform sampler2D tex;
+
 out vec4 fragColor;
+
+in vec2 texcoord;
 
 void main()
 {
-    fragColor = vec4(1.0, 0.4, 0.1, 1.0);
+    fragColor = vec4(texture(tex, texcoord, 0).rgb, 1.0);
 }
 
 )V0G0N";
@@ -107,7 +114,24 @@ VoxelTracer::VoxelTracer()
     indexArray = new Buffer();
     indexArray->UploadData(indices, sizeof(indices));
 
-    vertexArray.AddBuffer(vertexBuffer);
+    sampler = new Samplers();
+
+    vec4 image[50][50];
+    for (int i = 0; i < 50; i++)
+    {
+        for (int j = 0; j < 50; j++)
+        {
+            int fun = i ^ j;
+            image[i][j] = vec4((fun % 3 == 0) ? 0.0 : 1.0, (fun % 3 == 1) ? 0.0 : 1.0, (fun % 3 == 2) ? 0.0 : 1.0, 1.0);
+        }
+    }
+
+    texture = new Texture(BufferFormat::RGBA32F, 50, 50, 1);
+    texture->UploadImage(Texture::ImageFormat::RGBA, DataType::Float, 0, 0, 0, 50, 50, image);
+
+    sampler = new Samplers();
+
+    vertexArray.AddBuffer(vertexBuffer, 0, sizeof(vec3));
     vertexArray.SetIndexBuffer(indexArray);
     vertexArray.AddAttribute(DataType::Float, 3, sizeof(vec3), 0, 0);
     vertexArray.BuildArray();
@@ -133,6 +157,8 @@ void VoxelTracer::RenderScene()
     pipeline.ScopedExec([&](Pipeline& p)
         {
             vertexArray.UseVertexArray();
+            p.BindTexture(0, texture);
+            p.BindSamplers(0, sampler);
             p.DrawIndexed(PrimitiveType::Triangles, DataType::Uint16, 6, 0, 0, 1, 0);
         });
 }
@@ -166,7 +192,7 @@ void VoxelTracer::run()
         glfwGetFramebufferSize(m_context.window, &m_context.width, &m_context.height);
         glViewport(0, 0, m_context.width, m_context.height);
 
-        glClearColor(0.1, 0.2, 0.3, 1.0);
+        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         Update();

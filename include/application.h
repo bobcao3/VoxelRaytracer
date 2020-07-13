@@ -39,9 +39,12 @@ private:
 
     // Test content
     Pipeline pipeline;
+    VertexArray vertexArray;
     Buffer* vertexBuffer = nullptr;
     Buffer* indexArray = nullptr;
-    VertexArray vertexArray;
+    Buffer* image = nullptr;
+    Texture* texture = nullptr;
+    Samplers* sampler = nullptr;
 
 public:
     VoxelTracer();

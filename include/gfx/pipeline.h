@@ -28,13 +28,20 @@ public:
         bool normalized;
     };
 
+    struct BufferBindings
+    {
+        Buffer* buffer;
+        size_t offset;
+        size_t stride;
+    };
+
     std::vector<Attribute> vertexAttributes;
-    std::vector<Buffer*> buffers;
+    std::vector<BufferBindings> buffers;
 
     Buffer* indexBuffer = nullptr;
 
     void AddAttribute(DataType type, uint8_t numComponents, size_t stride, size_t offset, size_t bufferIndex, bool normalized = false);
-    void AddBuffer(Buffer* buf);
+    void AddBuffer(Buffer* buf, size_t offset, size_t stride);
     void SetIndexBuffer(Buffer* buf);
     void BuildArray();
     void UseVertexArray();
@@ -54,6 +61,10 @@ private:
         uint32_t program = 0;
     } shaders;
 
+#ifdef DEBUG
+    bool inScope = false;
+#endif
+
 public:
     // Shader Creation
     void LoadFragmentShader(std::string src);
@@ -72,6 +83,10 @@ public:
 
     // Pipeline execution
     void ScopedExec(std::function<void(Pipeline& p)> func);
+
+    // Resource bindings & constant buffers
+    void BindTexture(size_t bindPoint, Texture* texture);
+    void BindSamplers(size_t bindPoint, Samplers* sampler);
 
     // Raster Pipeline
     void DrawIndexed(PrimitiveType type, DataType indexFormat, uint32_t count, uint32_t indexOffset, uint32_t vertexOffset, uint32_t instanceCount = 1, uint32_t instanceOffset = 0);

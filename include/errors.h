@@ -10,7 +10,8 @@ enum class ErrorCode
     NO_ERROR,
     GLFW_INIT_FAILED,
     GLAD_INIT_FAILED,
-    GFX_SHADERS_NOT_COMPLETE
+    GFX_SHADERS_NOT_COMPLETE,
+    GFX_NOT_IN_SCOPE
 };
 
 #ifdef ERROR_MSGS_IMPL
@@ -18,8 +19,9 @@ enum class ErrorCode
 std::string ErrorCodeDesc[] = {
     "None",
     "GLFW failed to initiate",
-    "GLAD failed to initiate"
-    "The shaders specified are not complete (missing shader stages)"
+    "GLAD failed to initiate",
+    "The shaders specified are not complete (missing shader stages)",
+    "Command is not executed in scope"
 };
 
 #endif

@@ -192,9 +192,13 @@ void VertexArray::AddAttribute(DataType type, uint8_t numComponents, size_t stri
     attr.normalized = normalized;
 }
 
-void VertexArray::AddBuffer(Buffer* buf)
+void VertexArray::AddBuffer(Buffer* buf, size_t offset, size_t stride)
 {
-    buffers.push_back(buf);
+    BufferBindings& binding = buffers.emplace_back();
+
+    binding.buffer = buf;
+    binding.offset = offset;
+    binding.stride = stride;
 }
 
 void VertexArray::SetIndexBuffer(Buffer* buf)
@@ -209,32 +213,27 @@ void VertexArray::BuildArray()
         glDeleteVertexArrays(1, &VAO);
 
     // Create new VAO
-    glGenVertexArrays(1, &VAO);
+    glCreateVertexArrays(1, &VAO);
 
-    glBindVertexArray(VAO);
+    if (indexBuffer)
+        glVertexArrayElementBuffer(VAO, indexBuffer->buffer);
 
     uint32_t bufferIndex = 0;
-    
-    if (indexBuffer)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->buffer);
-
-    for (Buffer* buf : buffers)
+    for (BufferBindings& binding : buffers)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, buf->buffer);
-
-        uint32_t attrIndex = 0;
-        for (Attribute& attr : vertexAttributes) if (attr.bufferIndex == bufferIndex)
-        {
-            glVertexAttribPointer(attrIndex, GLuint(attr.numComponents), GLenum(attr.type), attr.normalized, GLsizei(attr.stride), (const void*)(attr.offset));
-            glEnableVertexAttribArray(attrIndex);
-
-            attrIndex++;
-        }
-
+        glVertexArrayVertexBuffer(VAO, bufferIndex, binding.buffer->buffer, binding.offset, binding.stride);
         bufferIndex++;
     }
 
-    glBindVertexArray(0);
+    uint32_t attrIndex = 0;
+    for (Attribute& attr : vertexAttributes)
+    {
+        glVertexArrayAttribFormat(VAO, attrIndex, GLuint(attr.numComponents), GLenum(attr.type), attr.normalized, GLuint(attr.offset));
+        glVertexArrayAttribBinding(VAO, attrIndex, attr.bufferIndex);
+        glEnableVertexArrayAttrib(VAO, attrIndex);
+
+        attrIndex++;
+    }
 }
 
 void VertexArray::UseVertexArray()
@@ -244,24 +243,55 @@ void VertexArray::UseVertexArray()
 
 void Pipeline::ScopedExec(std::function<void(Pipeline& p)> func)
 {
+#ifdef DEBUG
+    inScope = true;
+#endif
     glUseProgram(shaders.program);
 
     func(*this);
 
     glUseProgram(0);
+#ifdef DEBUG
+    inScope = false;
+#endif
+}
+
+void Pipeline::BindTexture(size_t bindPoint, Texture* texture)
+{
+    glBindTextureUnit(bindPoint, texture->texture);
+}
+
+void Pipeline::BindSamplers(size_t bindPoint, Samplers* sampler)
+{
+    glBindSampler(bindPoint, sampler->sampler);
 }
 
 void Pipeline::DrawIndexed(PrimitiveType type, DataType indexFormat, uint32_t count, uint32_t indexOffset, uint32_t vertexOffset, uint32_t instanceCount, uint32_t instanceOffset)
 {
+#ifdef DEBUG
+    if (!inScope)
+        throw ErrorCode::GFX_NOT_IN_SCOPE;
+#endif
+
     glDrawElementsInstancedBaseVertexBaseInstance(GLenum(type), count, GLenum(indexFormat), (const void*)(indexOffset), instanceCount, vertexOffset, instanceOffset);
 }
 
 void Pipeline::Draw(PrimitiveType type, uint32_t count, uint32_t vertexOffset, uint32_t instanceCount, uint32_t instanceOffset)
 {
+#ifdef DEBUG
+    if (!inScope)
+        throw ErrorCode::GFX_NOT_IN_SCOPE;
+#endif
+
     glDrawArraysInstancedBaseInstance(GLenum(type), vertexOffset, count, instanceCount, instanceOffset);
 }
 
 void Pipeline::Dispatch(uint32_t x, uint32_t y, uint32_t z)
 {
+#ifdef DEBUG
+    if (!inScope)
+        throw ErrorCode::GFX_NOT_IN_SCOPE;
+#endif
+
     glDispatchCompute(x, y, z);
 }
