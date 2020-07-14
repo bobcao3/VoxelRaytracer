@@ -101,11 +101,19 @@ VoxelTracer::VoxelTracer()
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+        ImGui::StyleColorsLight();
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
         ImGui_ImplGlfw_InitForOpenGL(m_context.window, false);
         ImGui_ImplOpenGL3_Init("#version 450");
-
-        ImGui::StyleColorsLight();
     }
 
     // Initialize timers
@@ -156,6 +164,7 @@ VoxelTracer::~VoxelTracer()
     delete vertexBuffer;
     // End test content
 
+    ImGui::DestroyPlatformWindows();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -187,24 +196,59 @@ void VoxelTracer::RenderUI()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // Main Menu & Docking space
+    {
+
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->GetWorkPos());
+        ImGui::SetNextWindowSize(viewport->GetWorkSize());
+        ImGui::SetNextWindowViewport(viewport->ID);
+        
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        window_flags |= ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::Begin("Main Window", nullptr, window_flags);
+        ImGui::PopStyleVar(2);
+
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Exit"))
+                {
+                    glfwSetWindowShouldClose(m_context.window, GLFW_TRUE);
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
+        ImGui::End();
+    }
+
     // Render GUI & Controls
-    ImGui::Begin("Debug");
-    ImGui::Text("VoxelTracer");
+    if (ImGui::Begin("General"))
+    {
+        ImGui::Text("VoxelTracer");
 
-    ImGui::Separator();
+        ImGui::Separator();
 
-    ImGui::Text("FPS Avg: %f", framesPerSecond);
-    ImGui::Text("3D: %fms", frameTimes[GPU3D]);
-    ImGui::Text("2D: %fms", frameTimes[GPU2D]);
+        ImGui::Text("FPS Avg: %f", framesPerSecond);
+        ImGui::Text("3D: %fms", frameTimes[GPU3D]);
+        ImGui::Text("2D: %fms", frameTimes[GPU2D]);
 
-    ImGui::End();
+        ImGui::End();
+    }
 
     ImGui::Render();
 }
 
 void VoxelTracer::Update()
 {
-    
 }
 
 void VoxelTracer::run()
@@ -228,17 +272,23 @@ void VoxelTracer::run()
 
         Update();
 
+        RenderUI();
+
         timers[GPU3D]->Start();
         RenderScene();
         timers[GPU3D]->End();
 
         timers[GPU2D]->Start();
-        RenderUI();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         timers[GPU2D]->End();
 
         frameTimes[GPU3D] = timers[GPU3D]->getTimeSpent();
         frameTimes[GPU2D] = timers[GPU2D]->getTimeSpent();
+
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
 
         glfwSwapBuffers(m_context.window);
     }

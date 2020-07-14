@@ -13,6 +13,7 @@
 #include <imgui.h>
 #include <examples/imgui_impl_glfw.h>
 #include <examples/imgui_impl_opengl3.h>
+#include <examples/imgui_impl_win32.h>
 
 #include <iostream>
 #include <string>
