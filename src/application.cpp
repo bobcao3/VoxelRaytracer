@@ -108,6 +108,12 @@ VoxelTracer::VoxelTracer()
         ImGui::StyleColorsLight();
     }
 
+    // Initialize timers
+    for (int i = 0; i < GPUTime::Count; i++)
+    {
+        timers[i] = new GPUTimer();
+    }
+
     // Test content
     pipeline.LoadFragmentShader(fragmentShader);
     pipeline.LoadVertexShader(vertexShader);
@@ -184,6 +190,13 @@ void VoxelTracer::RenderUI()
     // Render GUI & Controls
     ImGui::Begin("Debug");
     ImGui::Text("VoxelTracer");
+
+    ImGui::Separator();
+
+    ImGui::Text("FPS Avg: %f", framesPerSecond);
+    ImGui::Text("3D: %fms", frameTimes[GPU3D]);
+    ImGui::Text("2D: %fms", frameTimes[GPU2D]);
+
     ImGui::End();
 
     ImGui::Render();
@@ -196,8 +209,14 @@ void VoxelTracer::Update()
 
 void VoxelTracer::run()
 {
+    double previousTime = glfwGetTime();
+
     while (!glfwWindowShouldClose(m_context.window))
     {
+        double currentTime = glfwGetTime();
+        framesPerSecond = framesPerSecond * 0.9 + 1.0 / (currentTime - previousTime) * 0.1;
+        previousTime = currentTime;
+
         // Main Render Loop
         glfwPollEvents();
 
@@ -209,11 +228,17 @@ void VoxelTracer::run()
 
         Update();
 
+        timers[GPU3D]->Start();
         RenderScene();
+        timers[GPU3D]->End();
 
+        timers[GPU2D]->Start();
         RenderUI();
-
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        timers[GPU2D]->End();
+
+        frameTimes[GPU3D] = timers[GPU3D]->getTimeSpent();
+        frameTimes[GPU2D] = timers[GPU2D]->getTimeSpent();
 
         glfwSwapBuffers(m_context.window);
     }

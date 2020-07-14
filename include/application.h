@@ -18,6 +18,7 @@
 #include <string>
 
 #include "errors.h"
+#include "gfx/gfx.h"
 #include "gfx/pipeline.h"
 
 #include <glm/glm.hpp>
@@ -36,6 +37,17 @@ private:
     void RenderScene();
     void RenderUI();
     void Update();
+
+    enum GPUTime {
+        GPU3D,
+        GPU2D,
+        Count
+    };
+
+    GPUTimer* timers[GPUTime::Count];
+    double frameTimes[GPUTime::Count];
+
+    double framesPerSecond = 0.0;
 
     // Test content
     struct ShaderConstants

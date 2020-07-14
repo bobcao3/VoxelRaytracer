@@ -21,6 +21,8 @@ set(APPLICATION_SOURCE
     "src/raytracing.cpp"
     "src/gfx/buffer.cpp"
     "src/gfx/pipeline.cpp"
+    "src/gfx/gltf.cpp"
+    "src/gfx/gfx.cpp"
 
     # GLAD
     "external/glad/src/glad.c"
@@ -47,6 +49,7 @@ add_executable(tracer ${APPLICATION_SOURCE})
 
 add_subdirectory(external/glfw)
 add_subdirectory(external/glm)
+add_subdirectory(external/tinygltf)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
@@ -60,6 +63,7 @@ target_include_directories(tracer PUBLIC external/glfw/include)
 target_include_directories(tracer PUBLIC external/glad/include)
 target_include_directories(tracer PUBLIC external/glm)
 target_include_directories(tracer PUBLIC external/imgui)
+target_include_directories(tracer PUBLIC external/tinygltf)
 
 #-------------------------------------------------------------------------------
 # Set Compiler Options

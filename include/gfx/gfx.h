@@ -114,3 +114,18 @@ enum class BufferFormat
 
     Unkown = GL_ZERO
 };
+
+class GPUTimer
+{
+private:
+    GLuint64 startTime = 0, stopTime = 0;
+    unsigned int queryID[2];
+
+public:
+    GPUTimer();
+
+    void Start();
+    void End();
+
+    double getTimeSpent();
+};
