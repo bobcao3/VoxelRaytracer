@@ -87,6 +87,7 @@ public:
     // Resource bindings & constant buffers
     void BindTexture(size_t bindPoint, Texture* texture);
     void BindSamplers(size_t bindPoint, Samplers* sampler);
+    void BindConstants(size_t bindPoint, size_t offset, size_t size, Buffer* buffer);
 
     // Raster Pipeline
     void DrawIndexed(PrimitiveType type, DataType indexFormat, uint32_t count, uint32_t indexOffset, uint32_t vertexOffset, uint32_t instanceCount = 1, uint32_t instanceOffset = 0);

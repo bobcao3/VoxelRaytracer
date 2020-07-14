@@ -25,3 +25,5 @@ std::string ErrorCodeDesc[] = {
 };
 
 #endif
+
+std::ostream& operator<<(std::ostream& os, const ErrorCode& e);

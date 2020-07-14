@@ -43,13 +43,18 @@ std::string fragmentShader = R"V0G0N(
 
 layout(binding = 0) uniform sampler2D tex;
 
+layout(std140, binding = 1) uniform ShaderConstants
+{
+    vec4 color;
+};
+
 out vec4 fragColor;
 
 in vec2 texcoord;
 
 void main()
 {
-    fragColor = vec4(texture(tex, texcoord, 0).rgb, 1.0);
+    fragColor = vec4(texture(tex, texcoord, 0).rgb, 1.0) * color;
 }
 
 )V0G0N";
@@ -135,6 +140,8 @@ VoxelTracer::VoxelTracer()
     vertexArray.SetIndexBuffer(indexArray);
     vertexArray.AddAttribute(DataType::Float, 3, sizeof(vec3), 0, 0);
     vertexArray.BuildArray();
+
+    constants = new Buffer(sizeof(ShaderConstants));
 }
 
 VoxelTracer::~VoxelTracer()
@@ -156,9 +163,14 @@ void VoxelTracer::RenderScene()
     // Test content
     pipeline.ScopedExec([&](Pipeline& p)
         {
+            ShaderConstants* consts = constants->Map<ShaderConstants>(BufferAccess::WriteOnly);
+            consts->color = vec4(1.0, 0.0, 1.0, 1.0);
+            constants->Unmap();
+
             vertexArray.UseVertexArray();
             p.BindTexture(0, texture);
             p.BindSamplers(0, sampler);
+            p.BindConstants(1, 0, sizeof(ShaderConstants), constants);
             p.DrawIndexed(PrimitiveType::Triangles, DataType::Uint16, 6, 0, 0, 1, 0);
         });
 }

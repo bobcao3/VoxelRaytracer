@@ -266,6 +266,16 @@ void Pipeline::BindSamplers(size_t bindPoint, Samplers* sampler)
     glBindSampler(bindPoint, sampler->sampler);
 }
 
+void Pipeline::BindConstants(size_t bindPoint, size_t offset, size_t size, Buffer* buffer)
+{
+#ifdef DEBUG
+    if (!inScope)
+        throw ErrorCode::GFX_NOT_IN_SCOPE;
+#endif
+
+    glBindBufferRange(GL_UNIFORM_BUFFER, bindPoint, buffer->buffer, offset, size);
+}
+
 void Pipeline::DrawIndexed(PrimitiveType type, DataType indexFormat, uint32_t count, uint32_t indexOffset, uint32_t vertexOffset, uint32_t instanceCount, uint32_t instanceOffset)
 {
 #ifdef DEBUG

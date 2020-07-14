@@ -20,7 +20,7 @@
 #include "errors.h"
 #include "gfx/pipeline.h"
 
-std::ostream& operator<<(std::ostream& os, const ErrorCode& e);
+#include <glm/glm.hpp>
 
 class VoxelTracer
 {
@@ -38,11 +38,17 @@ private:
     void Update();
 
     // Test content
+    struct ShaderConstants
+    {
+        glm::vec4 color;
+    };
+
     Pipeline pipeline;
     VertexArray vertexArray;
     Buffer* vertexBuffer = nullptr;
     Buffer* indexArray = nullptr;
     Buffer* image = nullptr;
+    Buffer* constants = nullptr;
     Texture* texture = nullptr;
     Samplers* sampler = nullptr;
 
